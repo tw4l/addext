@@ -132,8 +132,11 @@ def main():
                                 new_filename = f + "." + file_ext
                                 # check if file already ends in correct extension before adding
                                 if not filepath.lower().endswith(file_ext):
-                                    os.rename(filepath, new_filepath)
-                                    print("File " + filepath + " only has one possible extension. Renamed to " + new_filename)
+                                    try:
+                                        os.rename(filepath, new_filepath)
+                                        print("File " + filepath + " only has one possible extension. Renamed to " + new_filename)
+                                    except OSError as err:
+                                        print("Error renaming file " + filepath + ": ", err)
                                 else:
                                     print("File " + filepath + " already has correct extension. Skipping file.")
                             # if > 1 extension, give control to user
@@ -158,8 +161,11 @@ def main():
                                     # append filename to file in-place
                                     new_filepath = filepath + "." + file_ext
                                     new_filename = f + "." + file_ext
-                                    os.rename(filepath, new_filepath)
-                                    print("File " + filepath + " renamed to " + new_filename)
+                                    try:
+                                        os.rename(filepath, new_filepath)
+                                        print("File " + filepath + " renamed to " + new_filename)
+                                    except OSError as err:
+                                        print("Error renaming file " + filepath + ": ", err)
                                 else:
                                     print("File " + filepath + " skipped.")
 
@@ -182,8 +188,11 @@ def main():
                         else:
                             # check if file already ends in correct extension before adding
                             if not filepath.lower().endswith(file_ext):
-                                os.rename(filepath, new_filepath)
-                                print("File " + filepath + " renamed to " + new_filename)
+                                try:
+                                    os.rename(filepath, new_filepath)
+                                    print("File " + filepath + " renamed to " + new_filename)
+                                except OSError as err:
+                                    print("Error renaming file " + filepath + ": ", err)
                             else:
                                 print("File " + filepath + " already has correct extension. Skipping file.")
                     else:
