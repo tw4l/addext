@@ -18,6 +18,7 @@ import sqlite3
 import subprocess
 import sys
 import tempfile
+import urllib2
 from pprint import pprint
 
 def _make_parser():
@@ -36,6 +37,30 @@ def _make_parser():
 
     return parser
 
+def download_pronom_db():
+    """
+    Download pronom.db from Github to script directory.
+    """
+    
+    print("Addext could not find pronom.db file in script directory.")
+    print("Downloading file now. This should only be necessary once.")
+
+    # url for pronom.db
+    url = "https://github.com/timothyryanwalsh/addext/blob/master/addext/pronom.db?raw=true"
+
+    # download file to current directory
+    file_name = "pronom.db"
+    u = urllib2.urlopen(url)
+    f = open(file_name, 'wb')
+    block_sz = 8192
+    while True:
+        buffer = u.read(block_sz)
+        if not buffer:
+            break
+        f.write(buffer)
+    f.close()
+    print("File successfully downloaded.")
+
 def main():
 
     # parse arguments
@@ -47,9 +72,16 @@ def main():
     # connect to pronom.db
     THIS_DIR = os.path.dirname(os.path.realpath(__file__))
     db = os.path.join(THIS_DIR, 'pronom.db')
-    conn = sqlite3.connect(db)
-    conn.text_factory = str  # allows utf-8 data to be stored
-    cursor = conn.cursor()
+    # download copy of pronom.db if not in same directory as script
+    if not os.path.isfile(db):
+        download_pronom_db()
+    try:
+        conn = sqlite3.connect(db)
+        conn.text_factory = str  # allows utf-8 data to be stored
+        cursor = conn.cursor()
+    except:
+        print("Error connecting to pronom.db database. Shutting down.")
+        sys.exit(69)
 
     # create DROID CSV if user didn't pass one to script
     if args.droid_csv:
