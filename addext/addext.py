@@ -147,9 +147,9 @@ def main():
                             else:
                                 # get user input
                                 if (sys.version_info > (3, 0)):
-                                    choice = input("File %s is format %s (%s). Possible extensions: %s. Add an extension? (yes/no)" % (filepath, fileformat, puid, ', '.join(map(str, file_ext_list))))
+                                    choice = input("File %s is format %s (%s). Possible extensions: %s. Add an extension? (y/n)" % (filepath, fileformat, puid, ', '.join(map(str, file_ext_list))))
                                 else:
-                                    choice = raw_input("File %s is format %s (%s). Possible extensions: %s. Add an extension? (yes/no)" % (filepath, fileformat, puid, ', '.join(map(str, file_ext_list))))
+                                    choice = raw_input("File %s is format %s (%s). Possible extensions: %s. Add an extension? (y/n)" % (filepath, fileformat, puid, ', '.join(map(str, file_ext_list))))
                                 # if input is yes, display options and apply change
                                 if choice.lower() in ['yes', 'y']:
                                     # use Inquirer to let user choose from list
