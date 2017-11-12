@@ -65,7 +65,28 @@ class TestAddextIntegration(SelfCleaningTestCase):
         # copy files to tmpdir
         for f in os.listdir('./test-data'):
             shutil.copy(j('./test-data', f), self.tmpdir)
-        # call adext in default (auto) mode
+        # call addext in default (auto) mode
+        subprocess.call("python addext/addext.py %s" % (self.tmpdir), 
+            shell=True)
+        # lists of expected filenames and files that should not be found
+        checklist = ['animation.mov', 'lorem-ipsum.pdf', 'PF.wk1', 
+            'TOPOREC.doc', 'valid.xls']
+        not_present = ['animation', 'lorem-ipsum', 'PF', 
+            'TOPOREC', 'valid']
+        # check for presence of renamed files
+        for f in checklist:
+            self.assertTrue(is_non_zero_file(j(self.tmpdir, f)))
+        # check that files without extensions are not present
+        for f in not_present:
+            self.assertFalse(is_non_zero_file(j(self.tmpdir, f)))
+
+    def test_with_DROID_csv(self):
+        # copy files to tmpdir
+        for f in os.listdir('./test-data'):
+            shutil.copy(j('./test-data', f), self.tmpdir)
+        # path to DROID csv
+        droid_csv = j(self.tmpdir, 'droid.csv')
+        # call addext in default (auto) mode
         subprocess.call("python addext/addext.py %s" % (self.tmpdir), 
             shell=True)
         # lists of expected filenames and files that should not be found
