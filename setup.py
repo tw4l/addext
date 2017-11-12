@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name = 'addext',
-    version = '0.3.1',
+    version = '1.0.0',
     url = 'https://github.com/timothyryanwalsh/addext',
     author = 'Tim Walsh',
     author_email = 'timothyryanwalsh@gmail.com',
