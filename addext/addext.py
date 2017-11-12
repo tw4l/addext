@@ -102,7 +102,7 @@ def main():
     for rt, dirs, files in os.walk(source):
         for f in files:
             filepath = os.path.join(rt, f)
-
+            puid = ''
             # search DROID CSV for path, get PUID
             with open(droid_csv) as droid:
                 r = csv.reader(droid)
@@ -112,7 +112,7 @@ def main():
                         fileformat = row[16]
             
             # if PUID found, carry on
-            if puid:
+            if puid != '':
                 # if manual, give option to user whenever > 1 possible extension is found
                 if args.manual:
                     # get list of possible extensions using puid
