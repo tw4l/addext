@@ -131,9 +131,9 @@ def main():
                             # if only one possible extension, just add it and report to user
                             if len(file_ext_list) == 1:
                                 # append filename to file in-place
-                                file_ext = file_ext_list[0]
-                                new_filepath = filepath + "." + file_ext
-                                new_filename = f + "." + file_ext
+                                file_ext = "." + file_ext_list[0]
+                                new_filepath = filepath + file_ext
+                                new_filename = f + file_ext
                                 # check if file already ends in correct extension before adding
                                 if not filepath.lower().endswith(file_ext):
                                     try:
@@ -161,10 +161,10 @@ def main():
                                     ]
                                     # get chosen extension
                                     answers = inquirer.prompt(questions)
-                                    file_ext = answers['extension']
+                                    file_ext = "." + answers['extension']
                                     # append filename to file in-place
-                                    new_filepath = filepath + "." + file_ext
-                                    new_filename = f + "." + file_ext
+                                    new_filepath = filepath + file_ext
+                                    new_filename = f + file_ext
                                     try:
                                         os.rename(filepath, new_filepath)
                                         print("File " + filepath + " renamed to " + new_filename)
