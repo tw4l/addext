@@ -2,6 +2,7 @@
 
 from __future__ import (print_function, unicode_literals)
 
+import csv
 import datetime
 import logging
 import os
@@ -46,6 +47,9 @@ class TestAddextIntegration(SelfCleaningTestCase):
     """
 
     def test_dryrun(self):
+        """
+        Test results of dryrun by checking terminal output.
+        """
         # file for terminal output
         checkfile = j(self.tmpdir, 'terminal-output.txt')
         # call addext, routing terminal output to file
@@ -62,6 +66,9 @@ class TestAddextIntegration(SelfCleaningTestCase):
             self.assertIn(statement, open(checkfile, 'r').read())
 
     def test_auto_renaming(self):
+        """
+        Test results of default auto-renaming mode.
+        """
         # copy files to tmpdir
         for f in os.listdir('./test-data'):
             shutil.copy(j('./test-data', f), self.tmpdir)
@@ -81,18 +88,31 @@ class TestAddextIntegration(SelfCleaningTestCase):
             self.assertFalse(is_non_zero_file(j(self.tmpdir, f)))
 
     def test_with_DROID_csv(self):
+        """
+        Test results using DROID CSV created by DROID v6.4
+        """
         # copy files to tmpdir
         for f in os.listdir('./test-data'):
             shutil.copy(j('./test-data', f), self.tmpdir)
         # path to DROID csv
         droid_csv = j(self.tmpdir, 'droid.csv')
+        # create modified DROID CSV with proper filepaths
+        new_droid = j(self.tmpdir, 'newdroid.csv')
+        with open(droid_csv) as droid, open(new_droid, 'w') as newdroid:
+            r = csv.reader(droid)
+            w = csv.writer(newdroid)
+            for row in r:
+                filename = row[4]
+                real_filepath = j(self.tmpdir, filename)
+                row[3] = real_filepath
+                w.writerow(row)
         # call addext in default (auto) mode
-        subprocess.call("python addext/addext.py %s" % (self.tmpdir), 
+        subprocess.call("python addext/addext.py --droid_csv %s %s" % (new_droid, self.tmpdir), 
             shell=True)
-        # lists of expected filenames and files that should not be found
-        checklist = ['animation.mov', 'lorem-ipsum.pdf', 'PF.wk1', 
+        # lists of expected filenames and files that should not be found (modified for DROID ID)
+        checklist = ['animation', 'lorem-ipsum.pdf', 'PF.wk1', 
             'TOPOREC.doc', 'valid.xls']
-        not_present = ['animation', 'lorem-ipsum', 'PF', 
+        not_present = ['lorem-ipsum', 'PF', 
             'TOPOREC', 'valid']
         # check for presence of renamed files
         for f in checklist:
