@@ -18,8 +18,12 @@ import sqlite3
 import subprocess
 import sys
 import tempfile
-import urllib2
-from pprint import pprint
+try:
+    # python3
+    from urllib.request import urlopen
+except ImportError:
+    # fall back to python 2's urllib2
+    from urllib2 import urlopen
 
 def _make_parser():
     parser = argparse.ArgumentParser()
@@ -50,7 +54,7 @@ def download_pronom_db():
 
     # download file to current directory
     file_name = "pronom.db"
-    u = urllib2.urlopen(url)
+    u = urlopen(url)
     f = open(file_name, 'wb')
     block_sz = 8192
     while True:
