@@ -52,13 +52,19 @@ To create a new database (for instance, after a new PRONOM release):
 
 ### Installation
 
+#### Install Siegfried
+
+
+
 #### Install via git clone/download
 
-The easiest way to install addext.py is to clone or download this repository and then run the script with `python addext.py [options]"`.
+The easiest way to install addext.py is to clone or download this repository and then run the script with `python /path/to/addext.py [options]`.
+
+If taking this route, install additional Python library dependencies: `pip install -r requirements.txt` or `pip install inquirer` (this may require sudo permissions).
 
 #### Install via PyPI
 
-addext can also be installed via `pip install addext`. This will install a script in the `/usr/local/bin` directory so that addext can be called from anywhere with simply `addext.py [options]`.
+addext can also be installed via `pip install addext`. This will install a script in the `/usr/local/bin` directory (assuming a Linux/macOS installation) so that addext can be called from anywhere with simply `addext.py [options]`.
 
 Note that because addext requires the `pronom.db` database to be in the same directory as the script, this installation method requires an extra step. After `pip install addext`, find where pip installed the `pronom.db` file and either copy or link the file to `/usr/local/bin` (this will require sudo permissions):
 
@@ -67,4 +73,3 @@ Note that because addext requires the `pronom.db` database to be in the same dir
 
 ### To do  
 * Update script for database so it's not necessary to re-create from scratch for each release  
-* Fix PyPI packaging (may need to remove automatic script generation - this is currently breaking the link to the `pronom.db` database unless a user with elevated permissions manually patches)
