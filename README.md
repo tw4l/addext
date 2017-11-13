@@ -37,6 +37,34 @@ Note that for directories with many files, going through the files one-by-one in
 
 Due to its dependency on [Inquirer](https://github.com/magmax/python-inquirer), manual mode is not available on Windows.
 
+### Dependencies  
+
+* [Siegfried](https://github.com/richardlehane/siegfried): For creating DROID-style CSVs. It is not necessary to have Siegfried installed on your system if you pass a DROID CSV file to addext with the `--droid_csv` flag.
+* [Inquirer](https://github.com/magmax/python-inquirer): For selection between extension options in `-m, --manual` mode (Linux/macOS only)
+
+### Installation
+
+#### Install Siegfried
+
+Install Siegfried following the instructions found [here](https://github.com/richardlehane/siegfried). 
+
+It is not necessary to install Siegfried if you plan to use CSV files created by DROID with the `--droid_csv` flag.
+
+#### Install via git clone/download
+
+The easiest way to install addext.py is to clone or download this repository and then run the script with `python /path/to/addext.py [options]`.
+
+If taking this route, install additional Python library dependencies: `pip install -r requirements.txt` or `pip install inquirer` (this may require sudo permissions).
+
+#### Install via PyPI
+
+addext can also be installed via `pip install addext`. This will install a script in the `/usr/local/bin` directory (assuming a Linux/macOS installation) so that addext can be called from anywhere with simply `addext.py [options]`.
+
+Note that because addext requires the `pronom.db` database to be in the same directory as the script, this installation method requires an extra step. After `pip install addext`, find where pip installed the `pronom.db` file and either copy or link the file to `/usr/local/bin` (this will require sudo permissions):
+
+* Copy: `sudo cp /path/to/pronom.db /usr/local/bin`  
+* Create a symbolic link: `sudo ln -s /path/to/pronom.db /usr/local/bin`  
+
 ### Updating the PRONOM file extension database
 
 `pronom.db` is currently up-to-date with PRONOM release: v92
@@ -45,11 +73,5 @@ To create a new database (for instance, after a new PRONOM release):
 * Use Ross Spencer's [pronom-xml-export](https://github.com/timothyryanwalsh/pronom-xml-export) to download XML files for all fmt and x-fmt PUIDs.
 * Run `pronom-xml-to-sqlite.py` to create a new pronom.db database from the XML exports.
 
-### Dependencies  
-
-* [Siegfried](https://github.com/richardlehane/siegfried): For creating DROID-style CSVs. It is not necessary to have Siegfried installed on your system if you pass a DROID CSV file to addext with the `--droid_csv` flag.
-* [Inquirer](https://github.com/magmax/python-inquirer): For selection between extension options in `-m, --manual` mode (Linux/macOS only)
-
 ### To do  
 * Update script for database so it's not necessary to re-create from scratch for each release  
-* Fix PyPI packaging (may need to remove automatic script generation - this is currently breaking the link to the `pronom.db` database unless a user with elevated permissions manually patches)
