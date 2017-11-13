@@ -63,7 +63,13 @@ def download_pronom_db():
             break
         f.write(buffer)
     f.close()
-    print("File successfully downloaded.")
+
+    # check that file was successfully downloaded
+    if os.path.isfile(file_name) and os.path.getsize(filename) > 0:
+        print("File successfully downloaded.")
+    else:
+        print("Error downloading database. Check permissions in script directory.")
+        sys.exit(69)
 
 def main():
 
