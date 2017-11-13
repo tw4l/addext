@@ -50,6 +50,21 @@ To create a new database (for instance, after a new PRONOM release):
 * [Siegfried](https://github.com/richardlehane/siegfried): For creating DROID-style CSVs. It is not necessary to have Siegfried installed on your system if you pass a DROID CSV file to addext with the `--droid_csv` flag.
 * [Inquirer](https://github.com/magmax/python-inquirer): For selection between extension options in `-m, --manual` mode (Linux/macOS only)
 
+### Installation
+
+#### Install via git clone/download
+
+The easiest way to install addext.py is to clone or download this repository and then run the script with `python addext.py [options]"`.
+
+#### Install via PyPI
+
+addext can also be installed via `pip install addext`. This will install a script in the `/usr/local/bin` directory so that addext can be called from anywhere with simply `addext.py [options]`.
+
+Note that because addext requires the `pronom.db` database to be in the same directory as the script, this installation method requires an extra step. After `pip install addext`, find where pip installed the `pronom.db` file and either copy or link the file to `/usr/local/bin` (this will require sudo permissions):
+
+* Copy: `sudo cp /path/to/pronom.db /usr/local/bin`  
+* Create a symbolic link: `sudo ln -s /path/to/pronom.db /usr/local/bin`  
+
 ### To do  
 * Update script for database so it's not necessary to re-create from scratch for each release  
 * Fix PyPI packaging (may need to remove automatic script generation - this is currently breaking the link to the `pronom.db` database unless a user with elevated permissions manually patches)
