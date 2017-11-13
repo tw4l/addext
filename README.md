@@ -54,7 +54,9 @@ To create a new database (for instance, after a new PRONOM release):
 
 #### Install Siegfried
 
+Install Siegfried following the instructions found [here](https://github.com/richardlehane/siegfried). 
 
+It is not necessary to install Siegfried if you plan to use CSV files created by DROID with the `--droid_csv` flag.
 
 #### Install via git clone/download
 
