@@ -37,14 +37,6 @@ Note that for directories with many files, going through the files one-by-one in
 
 Due to its dependency on [Inquirer](https://github.com/magmax/python-inquirer), manual mode is not available on Windows.
 
-### Updating the PRONOM file extension database
-
-`pronom.db` is currently up-to-date with PRONOM release: v92
-
-To create a new database (for instance, after a new PRONOM release):  
-* Use Ross Spencer's [pronom-xml-export](https://github.com/timothyryanwalsh/pronom-xml-export) to download XML files for all fmt and x-fmt PUIDs.
-* Run `pronom-xml-to-sqlite.py` to create a new pronom.db database from the XML exports.
-
 ### Dependencies  
 
 * [Siegfried](https://github.com/richardlehane/siegfried): For creating DROID-style CSVs. It is not necessary to have Siegfried installed on your system if you pass a DROID CSV file to addext with the `--droid_csv` flag.
@@ -72,6 +64,14 @@ Note that because addext requires the `pronom.db` database to be in the same dir
 
 * Copy: `sudo cp /path/to/pronom.db /usr/local/bin`  
 * Create a symbolic link: `sudo ln -s /path/to/pronom.db /usr/local/bin`  
+
+### Updating the PRONOM file extension database
+
+`pronom.db` is currently up-to-date with PRONOM release: v92
+
+To create a new database (for instance, after a new PRONOM release):  
+* Use Ross Spencer's [pronom-xml-export](https://github.com/timothyryanwalsh/pronom-xml-export) to download XML files for all fmt and x-fmt PUIDs.
+* Run `pronom-xml-to-sqlite.py` to create a new pronom.db database from the XML exports.
 
 ### To do  
 * Update script for database so it's not necessary to re-create from scratch for each release  
