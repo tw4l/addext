@@ -74,7 +74,7 @@ Note that because addext requires the `pronom.db` database to be in the same dir
 `pronom.db` is currently up-to-date with PRONOM release: v92
 
 To create a new database (for instance, after a new PRONOM release):  
-* Get PRONOM XML export from Ross Spencer's [Release repository for The Skeleton Test Suite](https://github.com/exponential-decay/pronom-archive-and-skeleton-test-suite), which provides a set of DOIs for archives of PRONOM releases (e.g., the [PRONOM v92](https://zenodo.org/record/1004423#.WgoFZ2GWa00)).
+* Get PRONOM XML export from Ross Spencer's [Release repository for The Skeleton Test Suite](https://github.com/exponential-decay/pronom-archive-and-skeleton-test-suite), which provides a set of DOIs for archives of PRONOM releases (e.g., [PRONOM v92](https://zenodo.org/record/1004423#.WgoFZ2GWa00)).
 * Run `pronom-xml-to-sqlite.py` to create a new pronom.db database from the XML exports.
 
 ### To do  
