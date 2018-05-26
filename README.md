@@ -79,3 +79,10 @@ To create a new database (for instance, after a new PRONOM release):
 
 ### To do  
 * Update script for database so it's not necessary to re-create from scratch for each release  
+
+### Creators
+
+* Canadian Centre for Architecture
+* Tim Walsh
+
+This project was initially developed in 2016-2017 for the [Canadian Centre for Architecture](https://cca.qc.ca) by Tim Walsh, Digital Archivist, as part of the development of the Archaeology of the Digital project.
