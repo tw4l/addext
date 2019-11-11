@@ -1,7 +1,0 @@
-"ID","PARENT_ID","URI","FILE_PATH","NAME","METHOD","STATUS","SIZE","TYPE","EXT","LAST_MODIFIED","EXTENSION_MISMATCH","HASH","FORMAT_COUNT","PUID","MIME_TYPE","FORMAT_NAME","FORMAT_VERSION"
-"2","","file:/Users/twalsh/addext/test-data/","/Users/twalsh/addext/test-data","test-data",,"Done","","Folder",,"2017-11-12T15:44:41","false",,"",,"","",""
-"5","2","file:/Users/twalsh/addext/test-data/PF","/Users/twalsh/addext/test-data/PF","PF","Signature","Done","23053","File","","2015-07-02T08:19:58","true",,"1","x-fmt/114","application/vnd.lotus-1-2-3, application/x-123","Lotus 1-2-3 Worksheet","2.0"
-"6","2","file:/Users/twalsh/addext/test-data/TOPOREC","/Users/twalsh/addext/test-data/TOPOREC","TOPOREC","Signature","Done","1099409","File","","2015-07-02T08:19:58","true",,"1","x-fmt/44","application/vnd.wordperfect","WordPerfect for MS-DOS/Windows Document","6.0"
-"4","2","file:/Users/twalsh/addext/test-data/animation","/Users/twalsh/addext/test-data/animation","animation","","Done","1020209","File","","2015-07-02T08:19:58","false",,"0",,"","",""
-"3","2","file:/Users/twalsh/addext/test-data/lorem-ipsum","/Users/twalsh/addext/test-data/lorem-ipsum","lorem-ipsum","Signature","Done","43433","File","","2015-07-02T08:19:58","true",,"1","fmt/17","application/pdf","Acrobat PDF 1.3 - Portable Document Format","1.3"
-"7","2","file:/Users/twalsh/addext/test-data/valid","/Users/twalsh/addext/test-data/valid","valid","Container","Done","270336","File","","2015-07-02T08:19:58","true",,"1","fmt/61","application/vnd.ms-excel","Microsoft Excel 97 Workbook (xls)","8"
