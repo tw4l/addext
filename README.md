@@ -1,6 +1,6 @@
 ## addext
 
-### Version: 2.0.0
+### Version: 2.0.1
 
 [![Build Status](https://travis-ci.org/timothyryanwalsh/addext.svg?branch=master)](https://travis-ci.org/timothyryanwalsh/addext)
 
