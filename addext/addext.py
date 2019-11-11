@@ -94,7 +94,7 @@ def _check_file_extension(filepath, extensions):
 
 def _rename_file(filepath, new_file, new_filepath, logger):
     """
-    Rename file in place and report OSErrors
+    Rename file in place and log OSErrors
     """
     try:
         os.rename(filepath, new_filepath)
@@ -119,7 +119,7 @@ def _process_file(root, filepath, pronom_data, args, logger):
     sf_data = json.loads(sf_json)
     puid = _puid_or_none(sf_data["files"][0]["matches"])
 
-    # Skip file if unidentified
+    # Return if unidentified
     if not puid:
         logger.info(f"Skipping {filepath} - format not identifiable")
         return
@@ -127,7 +127,7 @@ def _process_file(root, filepath, pronom_data, args, logger):
     # Save file format
     file_format = pronom_data[puid]["file_format"]
 
-    # Skip file if already has one of extensions listed in PRONOM
+    # Return if already has one of extensions listed in PRONOM
     extensions = pronom_data[puid]["file_extensions"]
     extension_in_place = _check_file_extension(filepath, extensions)
     if extension_in_place:
@@ -136,7 +136,7 @@ def _process_file(root, filepath, pronom_data, args, logger):
         )
         return
 
-    # Skip file if no extensions listed for format in PRONOM
+    # Return if no extensions listed for format in PRONOM
     if not extensions:
         logger.info(
             f"Skipping {filepath} - no extensions listed in PRONOM for {file_format} ({puid})"
@@ -145,12 +145,12 @@ def _process_file(root, filepath, pronom_data, args, logger):
 
     # If manual mode and > 1 extension available, prompt for user input
     if args.manual and len(extensions) > 1:
-        # Print all known extensions
+        # Log all known extensions
         extensions_str = ", ".join([x for x in extensions])
         logger.info(
             f"{filepath} identified as {file_format} ({puid}). Possible extensions: {extensions_str}"
         )
-        # If --dryrun, continue to next file
+        # If --dryrun, return
         if args.dryrun:
             return
         # Otherwise, prompt user for extension and rename file in place
@@ -176,7 +176,7 @@ def _process_file(root, filepath, pronom_data, args, logger):
     extension_to_add = extensions[0]
     new_file = f"{file_}.{extension_to_add}"
     new_filepath = os.path.join(root, new_file)
-    # If --dryrun, print action to take to terminal and continue
+    # If --dryrun, log change to make and return
     if args.dryrun:
         logger.info(
             f"{filepath} identified as {file_format} ({puid}). Rename {file_} -> {new_file}"
