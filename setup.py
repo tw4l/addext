@@ -2,19 +2,15 @@ from setuptools import setup
 
 setup(
     name='addext',
-    version='1.1.0',
+    version='2.0.0',
     url='https://github.com/timothyryanwalsh/addext',
     author='Tim Walsh',
     author_email='timothyryanwalsh@gmail.com',
     packages=['addext'],
-    package_data={
-        'addext': ['pronom.db']
-    },
-    include_package_data=True,
     py_modules=['addext'],
     scripts=['addext/addext.py'],
     install_requires=['inquirer'],
-    description='Adds file extensions to files based on their PRONOM identifiers (PUIDs).',
+    description='Adds file extensions based on PRONOM ID',
     keywords='extensions identification',
     platforms=['POSIX', 'Windows'],
     classifiers=[
@@ -22,7 +18,7 @@ setup(
         'License :: OSI Approved :: MIT License',
         'Intended Audience :: End Users/Desktop',
         'Intended Audience :: Developers',
-        'Natural Language :: English', 
+        'Natural Language :: English',
         'Operating System :: MacOS',
         'Operating System :: MacOS :: MacOS X',
         'Operating System :: POSIX :: Linux',
