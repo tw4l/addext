@@ -50,13 +50,13 @@ def _configure_logging():
     user's current directory and to stdout
     """
     logging.basicConfig(
-            level=logging.INFO,
-            format='%(asctime)s - %(levelname)s - %(message)s',
-            handlers=[
-                logging.FileHandler('addext.log'),
-                logging.StreamHandler(sys.stdout)
-            ]
-        )
+        level=logging.INFO,
+        format="%(asctime)s - %(levelname)s - %(message)s",
+        handlers=[
+            logging.FileHandler("addext.log"),
+            logging.StreamHandler(sys.stdout)
+        ],
+    )
     logger = logging.getLogger()
     return logger
 
@@ -98,7 +98,7 @@ def _rename_file(filepath, new_file, new_filepath, logger):
     """
     try:
         os.rename(filepath, new_filepath)
-        logger.info(f"File {filepath} renamed -> {new_file}")
+        logger.info(f"{filepath} renamed -> {new_file}")
     except OSError as e:
         logger.error(f"Unable to rename {filepath}. Details: {e}")
 
@@ -114,7 +114,7 @@ def _process_file(root, filepath, pronom_data, args, logger):
     try:
         sf_json = subprocess.check_output(cmd)
     except subprocess.CalledProcessError as e:
-        logger.error("Error calling Siegfried. Is it installed and on path?")
+        logger.error("Unable to call Siegfried. Is it installed and on path?")
         sys.exit(1)
     sf_data = json.loads(sf_json)
     puid = _puid_or_none(sf_data["files"][0]["matches"])
@@ -148,7 +148,7 @@ def _process_file(root, filepath, pronom_data, args, logger):
         # Print all known extensions
         extensions_str = ", ".join([x for x in extensions])
         logger.info(
-            f"File {filepath} identified as {file_format} ({puid}). Possible extensions: {extensions_str}"
+            f"{filepath} identified as {file_format} ({puid}). Possible extensions: {extensions_str}"
         )
         # If --dryrun, continue to next file
         if args.dryrun:
@@ -179,7 +179,7 @@ def _process_file(root, filepath, pronom_data, args, logger):
     # If --dryrun, print action to take to terminal and continue
     if args.dryrun:
         logger.info(
-            f"File {filepath} identified as {file_format} ({puid}). Rename {file_} -> {new_file}"
+            f"{filepath} identified as {file_format} ({puid}). Rename {file_} -> {new_file}"
         )
         return
     # Otherwise, rename file in place
