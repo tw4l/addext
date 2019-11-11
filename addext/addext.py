@@ -1,223 +1,219 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python3
 
 """
-Adds file extensions to files based on their PUIDs.
+addext
+------
+CLI utility to add file extensions to files without them based on PRONOM ID
 
-Tim Walsh
-November 2017
+Script has three modes:
+* Default: Adds first file extension associated with PUID in PRONOM
+* Dry run: Preview changes from Defualt mode without making any changes
+to the files
+* Manual: Manually choose extension to add to files when PRONOM gives several
+options (Linux/macOS only)
 
+Requires Siegfried and inquirer. See README for installation instructions
 """
 
 import argparse
-import csv
 import inquirer
+import logging
+import json
 import os
-import shutil
-import sqlite3
 import subprocess
 import sys
-import tempfile
-try:
-    # python3
-    from urllib.request import urlopen
-except ImportError:
-    # fall back to python 2's urllib2
-    from urllib2 import urlopen
+
 
 def _make_parser():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-d", "--dryrun", 
-        help="Perform dry run: print would-be changes to terminal", 
-        action="store_true")
-    parser.add_argument("-m", "--manual", 
-        help="Manually choose extension to add to files when PRONOM gives several options (not available in Windows)", 
-        action="store_true")
-    parser.add_argument("--droid_csv", 
-        help="Path to DROID CSV (created by DROID or Siegfried) for files",
-        action="store")
-    parser.add_argument("file", 
-        help="Path to file or files where extensions will be added")
+    parser.add_argument(
+        "-d",
+        "--dryrun",
+        help="Perform dry run: print would-be changes to terminal",
+        action="store_true",
+    )
+    parser.add_argument(
+        "-m",
+        "--manual",
+        help="Manually choose extension when multiple options (Linux/macOS)",
+        action="store_true",
+    )
+    parser.add_argument("target", help="Path to target file or directory")
+    parser.add_argument("json", help="Path to PRONOM JSON file")
 
     return parser
 
-def download_pronom_db():
+
+def _configure_logging():
     """
-    Download pronom.db from Github to script directory.
+    Configure logging to write to logfile created in
+    user's current directory and to stdout
     """
-    
-    print("Addext could not find pronom.db file in script directory.")
-    print("Downloading file now. This should only be necessary once.")
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s - %(levelname)s - %(message)s",
+        handlers=[
+            logging.FileHandler("addext.log"),
+            logging.StreamHandler(sys.stdout)
+        ],
+    )
+    logger = logging.getLogger()
+    return logger
 
-    # url for pronom.db
-    url = "https://github.com/timothyryanwalsh/addext/blob/master/addext/pronom.db?raw=true"
 
-    # download file to current directory
-    file_name = "pronom.db"
-    u = urlopen(url)
-    f = open(file_name, 'wb')
-    block_sz = 8192
-    while True:
-        buffer = u.read(block_sz)
-        if not buffer:
-            break
-        f.write(buffer)
-    f.close()
+def _puid_or_none(sf_matches):
+    """
+    From input list of dictionaries describing Siegfried
+    matches for given file, return PUID or None
+    """
+    puid = None
+    for match in sf_matches:
+        if match["ns"] == "pronom":
+            puid = match["id"]
+    return puid
 
-    # check that file was successfully downloaded
-    if os.path.isfile(file_name) and os.path.getsize(file_name) > 0:
-        print("File successfully downloaded.")
+
+def _check_file_extension(filepath, extensions):
+    """
+    Return True if file extension (case-insensitive)
+    is present in list, and False if not
+    """
+    # Get lower-cased file extension from path
+    _, file_extension = os.path.splitext(filepath)
+    file_extension_lower = file_extension[1:].lower()
+    # Make lower-cased list
+    extensions_lower = list()
+    for item in extensions:
+        extensions_lower.append(item.lower())
+    # Check equivalency
+    if file_extension_lower in extensions_lower:
+        return True
     else:
-        print("Error downloading database. Check permissions in script directory.")
-        sys.exit(69)
+        return False
+
+
+def _rename_file(filepath, new_file, new_filepath, logger):
+    """
+    Rename file in place and log OSErrors
+    """
+    try:
+        os.rename(filepath, new_filepath)
+        logger.info(f"{filepath} renamed -> {new_file}")
+    except OSError as e:
+        logger.error(f"Unable to rename {filepath}. Details: {e}")
+
+
+def _process_file(root, filepath, pronom_data, args, logger):
+    """
+    Identify and rename file, respecting user args
+    """
+    file_ = os.path.basename(filepath)
+
+    # Attempt to determine PUID with Siegfried
+    cmd = ["sf", "-json", filepath]
+    try:
+        sf_json = subprocess.check_output(cmd)
+    except subprocess.CalledProcessError as e:
+        logger.error("Unable to call Siegfried. Is it installed and on path?")
+        sys.exit(1)
+    sf_data = json.loads(sf_json)
+    puid = _puid_or_none(sf_data["files"][0]["matches"])
+
+    # Return if unidentified
+    if not puid:
+        logger.info(f"Skipping {filepath} - format not identifiable")
+        return
+
+    # Save file format
+    file_format = pronom_data[puid]["file_format"]
+
+    # Return if already has one of extensions listed in PRONOM
+    extensions = pronom_data[puid]["file_extensions"]
+    extension_in_place = _check_file_extension(filepath, extensions)
+    if extension_in_place:
+        logger.info(
+            f"Skipping {filepath} - already has correct extension for {file_format} ({puid})"
+        )
+        return
+
+    # Return if no extensions listed for format in PRONOM
+    if not extensions:
+        logger.info(
+            f"Skipping {filepath} - no extensions listed in PRONOM for {file_format} ({puid})"
+        )
+        return
+
+    # If manual mode and > 1 extension available, prompt for user input
+    if args.manual and len(extensions) > 1:
+        # Log all known extensions
+        extensions_str = ", ".join([x for x in extensions])
+        logger.info(
+            f"{filepath} identified as {file_format} ({puid}). Possible extensions: {extensions_str}"
+        )
+        # If --dryrun, return
+        if args.dryrun:
+            return
+        # Otherwise, prompt user for extension and rename file in place
+        else:
+            # Use Inquirer to let user choose from list
+            questions = [
+                inquirer.List(
+                    "extension",
+                    message="Which extension would you like to add?",
+                    choices=extensions,
+                )
+            ]
+            # Get chosen extension
+            answers = inquirer.prompt(questions)
+            extension_to_add = answers["extension"]
+            # Rename file
+            new_file = f"{file_}.{extension_to_add}"
+            new_filepath = os.path.join(root, new_file)
+            _rename_file(filepath, new_file, new_filepath, logger)
+            return
+
+    # If default (auto) mode or only 1 extension, use first extension
+    extension_to_add = extensions[0]
+    new_file = f"{file_}.{extension_to_add}"
+    new_filepath = os.path.join(root, new_file)
+    # If --dryrun, log change to make and return
+    if args.dryrun:
+        logger.info(
+            f"{filepath} identified as {file_format} ({puid}). Rename {file_} -> {new_file}"
+        )
+        return
+    # Otherwise, rename file in place
+    _rename_file(filepath, new_file, new_filepath, logger)
+
 
 def main():
-
-    # parse arguments
+    # Parse arguments
     parser = _make_parser()
     args = parser.parse_args()
 
-    source = os.path.abspath(args.file)
+    # Store fs references as abspaths
+    target = os.path.abspath(args.target)
+    pronom_json = os.path.abspath(args.json)
 
-    # connect to pronom.db
-    THIS_DIR = os.path.dirname(os.path.realpath(__file__))
-    db = os.path.join(THIS_DIR, 'pronom.db')
-    # download copy of pronom.db if not in same directory as script
-    if not os.path.isfile(db):
-        download_pronom_db()
-    try:
-        conn = sqlite3.connect(db)
-        conn.text_factory = str  # allows utf-8 data to be stored
-        cursor = conn.cursor()
-    except:
-        print("Error connecting to pronom.db database. Shutting down.")
-        sys.exit(69)
+    # Configure logging
+    logger = _configure_logging()
 
-    # create DROID CSV if user didn't pass one to script
-    if args.droid_csv:
-        droid_csv = os.path.abspath(args.droid_csv)
-    else:
-        # create tempdir for droid csv
-        tmpdir = tempfile.mkdtemp()
-        tmpdir_path = os.path.abspath(tmpdir)
-        droid_csv = os.path.join(tmpdir_path, 'droid.csv')
-        # create droid csv with siegfried
-        subprocess.call("sf -droid '%s' > '%s'" % (source, droid_csv), shell=True)
+    # Load PRONOM JSON as dictionary
+    with open(pronom_json, "r") as f:
+        pronom_data = json.load(f)
 
-    # loop through files
-    for rt, dirs, files in os.walk(source):
-        for f in files:
-            filepath = os.path.join(rt, f)
-            puid = ''
-            # search DROID CSV for path, get PUID
-            with open(droid_csv) as droid:
-                r = csv.reader(droid)
-                for row in r:
-                    if row[3] == filepath:
-                        puid = row[14]
-                        fileformat = row[16]
-            
-            # if PUID found, carry on
-            if puid != '':
-                # if manual, give option to user whenever > 1 possible extension is found
-                if args.manual:
-                    # get list of possible extensions using puid
-                    sql = "SELECT id from puids WHERE puid='%s';" % (puid)
-                    cursor.execute(sql)
-                    pk = cursor.fetchone()[0]
-                    sql = "SELECT extension from extensions WHERE puid='%s';" % (pk)
-                    cursor.execute(sql)
-                    file_ext_list = [item[0] for item in cursor.fetchall()]
-                    # if >= 1 extension found, carry on
-                    if file_ext_list:
-                        # check if dry run - if so, print results to terminal
-                        if args.dryrun == True:
-                            print("File %s is format %s (%s). Possible extensions: %s" % (filepath, fileformat, puid, ', '.join(map(str, file_ext_list))))
-                        else:
-                            # if only one possible extension, just add it and report to user
-                            if len(file_ext_list) == 1:
-                                # append filename to file in-place
-                                file_ext = "." + file_ext_list[0]
-                                new_filepath = filepath + file_ext
-                                new_filename = f + file_ext
-                                # check if file already ends in correct extension before adding
-                                if not filepath.lower().endswith(file_ext):
-                                    try:
-                                        os.rename(filepath, new_filepath)
-                                        print("File " + filepath + " only has one possible extension. Renamed to " + new_filename)
-                                    except OSError as err:
-                                        print("Error renaming file " + filepath + ": ", err)
-                                else:
-                                    print("File " + filepath + " already has correct extension. Skipping file.")
-                            # if > 1 extension, give control to user
-                            else:
-                                # get user input
-                                if (sys.version_info > (3, 0)):
-                                    choice = input("File %s is format %s (%s). Possible extensions: %s. Add an extension? (y/n)" % (filepath, fileformat, puid, ', '.join(map(str, file_ext_list))))
-                                else:
-                                    choice = raw_input("File %s is format %s (%s). Possible extensions: %s. Add an extension? (y/n)" % (filepath, fileformat, puid, ', '.join(map(str, file_ext_list))))
-                                # if input is yes, display options and apply change
-                                if choice.lower() in ['yes', 'y']:
-                                    # use Inquirer to let user choose from list
-                                    questions = [
-                                      inquirer.List('extension',
-                                                    message="Which extension would you like to add?",
-                                                    choices=file_ext_list,
-                                                ),
-                                    ]
-                                    # get chosen extension
-                                    answers = inquirer.prompt(questions)
-                                    file_ext = "." + answers['extension']
-                                    # append filename to file in-place
-                                    new_filepath = filepath + file_ext
-                                    new_filename = f + file_ext
-                                    try:
-                                        os.rename(filepath, new_filepath)
-                                        print("File " + filepath + " renamed to " + new_filename)
-                                    except OSError as err:
-                                        print("Error renaming file " + filepath + ": ", err)
-                                else:
-                                    print("File " + filepath + " skipped.")
+    # Check if target is file
+    if os.path.isfile(target):
+        root = os.path.split(target)[0]
+        _process_file(root, target, pronom_data, args, logger)
+        return
 
-                    else:
-                        print("File " + filepath + " identified as " + puid + ". No extensions are registered in PRONOM for this PUID. Skipping file.")
-                # else, use default extension (first listed in PRONOM for PUID)
-                else:
-                    sql = "SELECT default_extension from puids WHERE puid='%s';" % (puid)
-                    cursor.execute(sql)
-                    file_ext = cursor.fetchone()[0]
-                    if file_ext:
-                        new_filepath = filepath + "." + file_ext # filename + extension
-                        new_filename = f + "." + file_ext # new filename without path
-                        # check if dry run - if so, print results to stdout
-                        if args.dryrun == True:
-                            if not filepath.lower().endswith(file_ext):
-                                print("File %s is format %s (%s). Rename %s -> %s" % (filepath, fileformat, puid, f, new_filename))
-                            else:
-                                print("File " + filepath + " already has correct extension. Skipping file.")
-                        else:
-                            # check if file already ends in correct extension before adding
-                            if not filepath.lower().endswith(file_ext):
-                                try:
-                                    os.rename(filepath, new_filepath)
-                                    print("File " + filepath + " renamed to " + new_filename)
-                                except OSError as err:
-                                    print("Error renaming file " + filepath + ": ", err)
-                            else:
-                                print("File " + filepath + " already has correct extension. Skipping file.")
-                    else:
-                        print("File " + filepath + " identified as " + puid + ". No extensions are registered in PRONOM for this PUID. Skipping file.")
-            else:
-                print("File " + filepath + " not identified. Skipping file.")
+    # If target is dir, walk recursively
+    for root, _, files in os.walk(target):
+        for file_ in files:
+            filepath = os.path.join(root, file_)
+            _process_file(root, filepath, pronom_data, args, logger)
 
-    # delete DROID tempdir if applicable
-    if not args.droid_csv:
-        shutil.rmtree(tmpdir_path)
 
-    # close db, print finished message
-    conn.commit()
-    conn.close()
-    print("Process complete.")
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
