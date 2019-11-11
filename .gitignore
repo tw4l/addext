@@ -1,1 +1,4 @@
 addext.log
+addext.egg-info/
+build/
+dist/
