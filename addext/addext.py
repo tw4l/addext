@@ -17,6 +17,7 @@ Requires Siegfried and inquirer. See README for installation instructions
 
 import argparse
 import inquirer
+import logging
 import json
 import os
 import subprocess
@@ -41,6 +42,23 @@ def _make_parser():
     parser.add_argument("json", help="Path to PRONOM JSON file")
 
     return parser
+
+
+def _configure_logging():
+    """
+    Configure logging to write to logfile created in
+    user's current directory and to stdout
+    """
+    logging.basicConfig(
+            level=logging.INFO,
+            format='%(asctime)s - %(levelname)s - %(message)s',
+            handlers=[
+                logging.FileHandler('addext.log'),
+                logging.StreamHandler(sys.stdout)
+            ]
+        )
+    logger = logging.getLogger()
+    return logger
 
 
 def _puid_or_none(sf_matches):
@@ -74,18 +92,18 @@ def _check_file_extension(filepath, extensions):
         return False
 
 
-def _rename_file(filepath, new_file, new_filepath):
+def _rename_file(filepath, new_file, new_filepath, logger):
     """
     Rename file in place and report OSErrors
     """
     try:
         os.rename(filepath, new_filepath)
-        print(f"File {filepath} renamed -> {new_file}")
+        logger.info(f"File {filepath} renamed -> {new_file}")
     except OSError as e:
-        print(f"ERROR - Unable to rename {filepath}. Details: {e}")
+        logger.error(f"Unable to rename {filepath}. Details: {e}")
 
 
-def _process_file(root, filepath, pronom_data, args):
+def _process_file(root, filepath, pronom_data, args, logger):
     """
     Identify and rename file, respecting user args
     """
@@ -96,14 +114,14 @@ def _process_file(root, filepath, pronom_data, args):
     try:
         sf_json = subprocess.check_output(cmd)
     except subprocess.CalledProcessError as e:
-        print("Error calling Siegfried. Is it installed and on path?")
+        logger.error("Error calling Siegfried. Is it installed and on path?")
         sys.exit(1)
     sf_data = json.loads(sf_json)
     puid = _puid_or_none(sf_data["files"][0]["matches"])
 
     # Skip file if unidentified
     if not puid:
-        print(f"Skipping {filepath} - format not identifiable")
+        logger.info(f"Skipping {filepath} - format not identifiable")
         return
 
     # Save file format
@@ -113,14 +131,14 @@ def _process_file(root, filepath, pronom_data, args):
     extensions = pronom_data[puid]["file_extensions"]
     extension_in_place = _check_file_extension(filepath, extensions)
     if extension_in_place:
-        print(
+        logger.info(
             f"Skipping {filepath} - already has correct extension for {file_format} ({puid})"
         )
         return
 
     # Skip file if no extensions listed for format in PRONOM
     if not extensions:
-        print(
+        logger.info(
             f"Skipping {filepath} - no extensions listed in PRONOM for {file_format} ({puid})"
         )
         return
@@ -129,7 +147,7 @@ def _process_file(root, filepath, pronom_data, args):
     if args.manual and len(extensions) > 1:
         # Print all known extensions
         extensions_str = ", ".join([x for x in extensions])
-        print(
+        logger.info(
             f"File {filepath} identified as {file_format} ({puid}). Possible extensions: {extensions_str}"
         )
         # If --dryrun, continue to next file
@@ -151,7 +169,7 @@ def _process_file(root, filepath, pronom_data, args):
             # Rename file
             new_file = f"{file_}.{extension_to_add}"
             new_filepath = os.path.join(root, new_file)
-            _rename_file(filepath, new_file, new_filepath)
+            _rename_file(filepath, new_file, new_filepath, logger)
             return
 
     # If default (auto) mode or only 1 extension, use first extension
@@ -160,12 +178,12 @@ def _process_file(root, filepath, pronom_data, args):
     new_filepath = os.path.join(root, new_file)
     # If --dryrun, print action to take to terminal and continue
     if args.dryrun:
-        print(
+        logger.info(
             f"File {filepath} identified as {file_format} ({puid}). Rename {file_} -> {new_file}"
         )
         return
     # Otherwise, rename file in place
-    _rename_file(filepath, new_file, new_filepath)
+    _rename_file(filepath, new_file, new_filepath, logger)
 
 
 def main():
@@ -177,6 +195,9 @@ def main():
     target = os.path.abspath(args.target)
     pronom_json = os.path.abspath(args.json)
 
+    # Configure logging
+    logger = _configure_logging()
+
     # Load PRONOM JSON as dictionary
     with open(pronom_json, "r") as f:
         pronom_data = json.load(f)
@@ -184,14 +205,14 @@ def main():
     # Check if target is file
     if os.path.isfile(target):
         root = os.path.split(target)[0]
-        _process_file(root, target, pronom_data, args)
+        _process_file(root, target, pronom_data, args, logger)
         return
 
     # If target is dir, walk recursively
     for root, _, files in os.walk(target):
         for file_ in files:
             filepath = os.path.join(root, file_)
-            _process_file(root, filepath, pronom_data, args)
+            _process_file(root, filepath, pronom_data, args, logger)
 
 
 if __name__ == "__main__":
