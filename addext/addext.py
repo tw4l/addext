@@ -26,25 +26,19 @@ import sys
 def _make_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        '-d',
-        '--dryrun',
-        help='Perform dry run: print would-be changes to terminal',
-        action='store_true'
+        "-d",
+        "--dryrun",
+        help="Perform dry run: print would-be changes to terminal",
+        action="store_true",
     )
     parser.add_argument(
-        '-m',
-        '--manual',
-        help='Manually choose extension when multiple options (Linux/macOS)',
-        action='store_true'
+        "-m",
+        "--manual",
+        help="Manually choose extension when multiple options (Linux/macOS)",
+        action="store_true",
     )
-    parser.add_argument(
-        'target',
-        help='Path to target file or directory'
-    )
-    parser.add_argument(
-        'json',
-        help='Path to PRONOM JSON file'
-    )
+    parser.add_argument("target", help="Path to target file or directory")
+    parser.add_argument("json", help="Path to PRONOM JSON file")
 
     return parser
 
@@ -56,8 +50,8 @@ def _puid_or_none(sf_matches):
     """
     puid = None
     for match in sf_matches:
-        if match['ns'] == 'pronom':
-            puid = match['id']
+        if match["ns"] == "pronom":
+            puid = match["id"]
     return puid
 
 
@@ -86,9 +80,9 @@ def _rename_file(filepath, new_file, new_filepath):
     """
     try:
         os.rename(filepath, new_filepath)
-        print(f'File {filepath} renamed -> {new_file}')
+        print(f"File {filepath} renamed -> {new_file}")
     except OSError as e:
-        print(f'ERROR - Unable to rename {filepath}. Details: {e}')
+        print(f"ERROR - Unable to rename {filepath}. Details: {e}")
 
 
 def _process_file(root, filepath, pronom_data, args):
@@ -98,40 +92,46 @@ def _process_file(root, filepath, pronom_data, args):
     file_ = os.path.basename(filepath)
 
     # Attempt to determine PUID with Siegfried
-    cmd = ['sf', '-json', filepath]
+    cmd = ["sf", "-json", filepath]
     try:
         sf_json = subprocess.check_output(cmd)
     except subprocess.CalledProcessError as e:
-        print('Error calling Siegfried. Is it installed and on path?')
+        print("Error calling Siegfried. Is it installed and on path?")
         sys.exit(1)
     sf_data = json.loads(sf_json)
-    puid = _puid_or_none(sf_data['files'][0]['matches'])
+    puid = _puid_or_none(sf_data["files"][0]["matches"])
 
     # Skip file if unidentified
     if not puid:
-        print(f'Skipping {filepath} - format not identifiable')
+        print(f"Skipping {filepath} - format not identifiable")
         return
 
     # Save file format
-    file_format = pronom_data[puid]['file_format']
+    file_format = pronom_data[puid]["file_format"]
 
     # Skip file if already has one of extensions listed in PRONOM
-    extensions = pronom_data[puid]['file_extensions']
+    extensions = pronom_data[puid]["file_extensions"]
     extension_in_place = _check_file_extension(filepath, extensions)
     if extension_in_place:
-        print(f'Skipping {filepath} - already has correct extension for {file_format} ({puid})')
+        print(
+            f"Skipping {filepath} - already has correct extension for {file_format} ({puid})"
+        )
         return
 
     # Skip file if no extensions listed for format in PRONOM
     if not extensions:
-        print(f'Skipping {filepath} - no extensions listed in PRONOM for {file_format} ({puid})')
+        print(
+            f"Skipping {filepath} - no extensions listed in PRONOM for {file_format} ({puid})"
+        )
         return
 
     # If manual mode and > 1 extension available, prompt for user input
     if args.manual and len(extensions) > 1:
         # Print all known extensions
-        extensions_str = ', '.join([x for x in extensions])
-        print(f'File {filepath} identified as {file_format} ({puid}). Possible extensions: {extensions_str}')
+        extensions_str = ", ".join([x for x in extensions])
+        print(
+            f"File {filepath} identified as {file_format} ({puid}). Possible extensions: {extensions_str}"
+        )
         # If --dryrun, continue to next file
         if args.dryrun:
             return
@@ -139,28 +139,30 @@ def _process_file(root, filepath, pronom_data, args):
         else:
             # Use Inquirer to let user choose from list
             questions = [
-              inquirer.List(
-                'extension',
-                message="Which extension would you like to add?",
-                choices=extensions,
-                ),
+                inquirer.List(
+                    "extension",
+                    message="Which extension would you like to add?",
+                    choices=extensions,
+                )
             ]
             # Get chosen extension
             answers = inquirer.prompt(questions)
-            extension_to_add = answers['extension']
+            extension_to_add = answers["extension"]
             # Rename file
-            new_file = f'{file_}.{extension_to_add}'
+            new_file = f"{file_}.{extension_to_add}"
             new_filepath = os.path.join(root, new_file)
             _rename_file(filepath, new_file, new_filepath)
             return
 
     # If default (auto) mode or only 1 extension, use first extension
     extension_to_add = extensions[0]
-    new_file = f'{file_}.{extension_to_add}'
+    new_file = f"{file_}.{extension_to_add}"
     new_filepath = os.path.join(root, new_file)
     # If --dryrun, print action to take to terminal and continue
     if args.dryrun:
-        print(f'File {filepath} identified as {file_format} ({puid}). Rename {file_} -> {new_file}')
+        print(
+            f"File {filepath} identified as {file_format} ({puid}). Rename {file_} -> {new_file}"
+        )
         return
     # Otherwise, rename file in place
     _rename_file(filepath, new_file, new_filepath)
@@ -176,7 +178,7 @@ def main():
     pronom_json = os.path.abspath(args.json)
 
     # Load PRONOM JSON as dictionary
-    with open(pronom_json, 'r') as f:
+    with open(pronom_json, "r") as f:
         pronom_data = json.load(f)
 
     # Check if target is file
@@ -192,5 +194,5 @@ def main():
             _process_file(root, filepath, pronom_data, args)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
