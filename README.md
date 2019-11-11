@@ -8,9 +8,9 @@ Python script to add file extensions to files without them, based on Siegfried i
 
 ### Calling addext
 
-`addext.py` takes two positional argument:
+`addext.py` takes two positional arguments:
 * `target`: Path to target file or directory
-* `json`: Path to addext PRONOM JSON file (`pronom_v95.json` is included in this repository for convenience. See README below for instructions on how to create a JSON file in expected format from PRONOM XML exports)
+* `json`: Path to addext PRONOM JSON file (`pronom_v95.json` is included in this repository for convenience. See **PRONOM JSON file** section below for instructions on how to create a new JSON file in expected format from PRONOM XML exports)
 
 Options include:  
 * `-d, --dryrun`: Perform dry run (print would-be changes to terminal instead of renaming files)
