@@ -5,7 +5,10 @@ import shutil
 import subprocess
 import tempfile
 import unittest
+
 from os.path import join as j
+
+from addext.addext import _puid_or_none, _check_file_extension
 
 
 def is_non_zero_file(fpath):
@@ -13,7 +16,9 @@ def is_non_zero_file(fpath):
 
 
 class SelfCleaningTestCase(unittest.TestCase):
-    """TestCase subclass which cleans up self.tmpdir after each test"""
+    """
+    TestCase subclass which cleans up self.tmpdir after each test
+    """
 
     def setUp(self):
         super(SelfCleaningTestCase, self).setUp()
@@ -121,6 +126,55 @@ class TestIntegration(SelfCleaningTestCase):
         ]
         for f in not_present:
             self.assertFalse(is_non_zero_file(j(self.tmpdir, f)))
+
+
+class TestUnit(unittest.TestCase):
+    """
+    Unit tests
+    """
+
+    def test_puid_or_none(self):
+        """
+        Unit tests for function _test_puid_or_none()
+        """
+        # Test input with PUID
+        list_with_puid = [
+            {
+                "ns": "pronom",
+                "id": "x-fmt/384",
+                "format": "Quicktime",
+                "version": "",
+                "mime": "video/quicktime",
+                "basis": "byte match at 4, 8 (signature 4/8)",
+                "warning": "extension mismatch"
+            }
+        ]
+        puid = _puid_or_none(list_with_puid)
+        self.assertTrue(puid == 'x-fmt/384')
+        # Test input with no PUID
+        list_without_puid = [
+            {
+                "ns": "something else",
+                "id": "abc123"
+            }
+        ]
+        puid = _puid_or_none(list_without_puid)
+        self.assertTrue(puid is None)
+
+    def test_check_file_extension(self):
+        """
+        Unit tests for function _check_file_extension()
+        """
+        filepath = '/my/madeup/filepath.odt'
+        # Test positive case
+        pos_extensions = ['odt', 'ods', 'docx']
+        self.assertTrue(_check_file_extension(filepath, pos_extensions))
+        # Test case sensitivity
+        caps_extensions = ['ODT']
+        self.assertTrue(_check_file_extension(filepath, caps_extensions))
+        # Test negative case
+        neg_extensions = ['ods', 'docx', 'rtf']
+        self.assertFalse(_check_file_extension(filepath, neg_extensions))
 
 
 if __name__ == '__main__':
