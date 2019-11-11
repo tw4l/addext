@@ -9,5 +9,8 @@ before_install:
   - sudo apt-get update && sudo apt-get install siegfried
 install:
   - pip install inquirer
+  - pip install --user codecov
 script:
   - python test.py
+after_success:
+  - codecov
