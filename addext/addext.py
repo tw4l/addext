@@ -3,20 +3,16 @@
 """
 addext
 ------
-CLI utility to add file extensions to files without
-themm based on PRONOM ID (PUID), using file extension
-associated with that PUID in PRONOM.
+CLI utility to add file extensions to files without them based on PRONOM ID
 
 Script has three modes:
-* Default: Adds first file extension associated
-with PUID in PRONOM
-* Dry run: Preview changes from Defualt mode without
-making any changes to the files
-* Manual: Manually choose extension to add to files when
-PRONOM gives several options (Linux/macOS only)
+* Default: Adds first file extension associated with PUID in PRONOM
+* Dry run: Preview changes from Defualt mode without making any changes
+to the files
+* Manual: Manually choose extension to add to files when PRONOM gives several
+options (Linux/macOS only)
 
-pip dpendencies: inquirer, requests
-Other dependencies: Siegfried
+Requires Siegfried and inquirer. See README for installation instructions
 """
 
 import argparse
