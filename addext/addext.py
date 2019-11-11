@@ -7,7 +7,7 @@ CLI utility to add file extensions to files without them based on PRONOM ID
 
 Script has three modes:
 * Default: Adds first file extension associated with PUID in PRONOM
-* Dry run: Preview changes from Defualt mode without making any changes
+* Dry run: Preview changes from Default mode without making any changes
 to the files
 * Manual: Manually choose extension to add to files when PRONOM gives several
 options (Linux/macOS only)
