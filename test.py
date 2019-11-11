@@ -107,8 +107,9 @@ class TestIntegration(SelfCleaningTestCase):
         cmd = f'python3 addext/addext.py {self.tmpdir} addext/pronom_v95.json'
         subprocess.call(cmd, shell=True)
         # Check that file with correct extension was not renamed
-        unchanged = '641790.pdf'
-        self.assertTrue(is_non_zero_file(j(self.tmpdir, unchanged)))
+        unchanged = ['lowercase_extension.pdf', 'uppercase_extension.PDF']
+        for f in unchanged:
+            self.assertTrue(is_non_zero_file(j(self.tmpdir, f)))
         # Check for presence of renamed files
         present = [
             'animation.mov',
