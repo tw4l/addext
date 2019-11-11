@@ -1,10 +1,10 @@
 ## addext
 
-### Version: 1.1.0
+### Version: 2.0.0
 
 [![Build Status](https://travis-ci.org/timothyryanwalsh/addext.svg?branch=master)](https://travis-ci.org/timothyryanwalsh/addext)
 
-Python script to add file extensions to files without them, based on DROID/Siegfried identification of PUID.
+Python script to add file extensions to files without them, based on Siegfried identification of PUID.
 
 ### Calling addext
 
