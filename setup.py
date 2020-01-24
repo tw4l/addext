@@ -3,7 +3,7 @@ from setuptools import setup
 setup(
     name='addext',
     version='2.0.1',
-    url='https://github.com/timothyryanwalsh/addext',
+    url='https://github.com/tw4l/addext',
     author='Tim Walsh',
     author_email='timothyryanwalsh@gmail.com',
     packages=['addext'],
