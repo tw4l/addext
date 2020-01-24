@@ -2,7 +2,7 @@
 
 ### Version: 2.0.1
 
-[![Build Status](https://travis-ci.org/timothyryanwalsh/addext.svg?branch=master)](https://travis-ci.org/timothyryanwalsh/addext)
+[![Build Status](https://travis-ci.org/tw4l/addext.svg?branch=master)](https://travis-ci.org/tw4l/addext)
 
 Python script to add file extensions to files without them, based on Siegfried identification of PUID.
 
