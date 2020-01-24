@@ -5,7 +5,7 @@ setup(
     version='2.0.1',
     url='https://github.com/tw4l/addext',
     author='Tim Walsh',
-    author_email='timothyryanwalsh@gmail.com',
+    author_email='tim@bitarchivist.net',
     packages=['addext'],
     py_modules=['addext'],
     scripts=['addext/addext.py'],
