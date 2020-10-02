@@ -4,7 +4,7 @@
 
 [![Build Status](https://travis-ci.org/tw4l/addext.svg?branch=master)](https://travis-ci.org/tw4l/addext)
 
-Python script to add file extensions to files without them, based on Siegfried identification of PUID.
+Python script to add file extensions to files without them, based on [Siegfried](https://github.com/richardlehane/siegfried) format identification.
 
 ### Calling addext
 
@@ -90,6 +90,6 @@ To create a new PRONOM JSON file (for instance, after a new PRONOM release):
 ### Creators
 
 * Canadian Centre for Architecture
-* Tim Walsh
+* Tessa Walsh
 
-This project was initially developed in 2016-2017 for the [Canadian Centre for Architecture](https://www.cca.qc.ca) by Tim Walsh, Digital Archivist, as part of the development of the Archaeology of the Digital project.
+This project was initially developed in 2016-2017 for the [Canadian Centre for Architecture](https://www.cca.qc.ca) by Tessa Walsh, Digital Archivist, as part of the development of the Archaeology of the Digital project.
